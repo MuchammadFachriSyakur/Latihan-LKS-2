@@ -1,0 +1,106 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Data.SqlClient;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using System.IO;
+
+namespace gudang
+{
+    public partial class Form1 : Form
+    {
+        private SqlConnection conn;
+        //private FileStream fileStream;
+
+        public Form1()
+        {
+            InitializeComponent();
+
+            conn = new SqlConnection(@"Data Source=MYBOOKHYPE;Initial Catalog=gudang;User ID=sa;Password=123;TrustServerCertificate=True");
+
+        }
+
+
+
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        private void Panel1_Paint(object sender, PaintEventArgs e)
+        {
+
+        }
+
+        string imageLocation = "";
+
+        private void btn_upload_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                OpenFileDialog fileDialog = new OpenFileDialog();
+
+                fileDialog.Filter = "Select image(*.jpg; *.png; *.Gif) |*.Jpg; *.png; *Gif";
+
+                if (fileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    MessageBox.Show($"{Image.FromFile(fileDialog.FileName)}");
+                    gambarUpload.Image = Image.FromFile(fileDialog.FileName);
+                    imageLocation = fileDialog.FileName.ToString();
+                }
+            }
+            catch (Exception)
+            {
+                MessageBox.Show("Gambar yang kamu upload error");
+            }
+        }
+
+        private void btn_insert_Click(object sender, EventArgs e)
+        {
+            if (conn.State != ConnectionState.Open)
+            {
+                conn.Open();
+            }
+
+            byte[] img = null;
+            FileStream Stream = new FileStream(imageLocation, FileMode.Open, FileAccess.Read);
+            BinaryReader brs = new BinaryReader(Stream);
+            img = brs.ReadBytes((int)Stream.Length);
+
+            string convertImg = Convert.ToString(img);
+
+            string kode = inputKode.Text.Trim();
+            string nama = inputNama.Text.Trim();
+            string satuan = inputSatuan.Text.Trim();
+            string lokasi = inputLokasi.Text.Trim();
+            int stock_awal = Convert.ToInt32(inputStokAwal.Value);
+
+
+            string query = "INSERT INTO barang (kode,nama,satuan,stok_awal,lokasi,foto) VALUES (@kode,@nama,@satuan,@stock_awal,@lokasi,@foto)";
+
+            using (SqlCommand cmd = new SqlCommand(query, conn))
+            {
+                cmd.Parameters.Add("@kode", SqlDbType.Char, 20).Value = kode;
+                cmd.Parameters.Add("@nama", SqlDbType.Char, 80).Value = nama;
+                cmd.Parameters.Add("@satuan", SqlDbType.Char, 40).Value = satuan;
+                cmd.Parameters.Add("@stock_awal", SqlDbType.Int).Value = stock_awal;
+                cmd.Parameters.Add("@lokasi", SqlDbType.Char, 40).Value = lokasi;
+                cmd.Parameters.Add("@foto", SqlDbType.Text).Value = convertImg;
+
+                int result = cmd.ExecuteNonQuery();
+
+                if(result > 0)
+                {
+                    MessageBox.Show("Succesfull");
+                }
+            }
+
+        }
+    }
+}
