@@ -1,0 +1,18 @@
+-- Tabel akun
+CREATE TABLE akun (
+    id_akun INT IDENTITY(1,1) PRIMARY KEY,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    tanggal_daftar DATETIME DEFAULT GETDATE()
+);
+
+-- Tabel profil
+CREATE TABLE profil (
+    id_profil INT IDENTITY(1,1) PRIMARY KEY,
+    id_akun INT NOT NULL, -- Foreign key ke tabel akun
+    nama_lengkap VARCHAR(100) NOT NULL,
+    alamat TEXT,
+    no_telepon VARCHAR(15) UNIQUE,
+    FOREIGN KEY (id_akun) REFERENCES akun(id_akun) ON DELETE CASCADE
+);
