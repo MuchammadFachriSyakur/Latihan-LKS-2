@@ -1,0 +1,55 @@
+using System;
+using System.IO;
+using System.Windows.Forms;
+
+namespace UploadGambarWinForms
+{
+    public partial class Form1 : Form
+    {
+        public Form1()
+        {
+            InitializeComponent();
+        }
+
+        private void btnUpload_Click(object sender, EventArgs e)
+        {
+            // Membuka dialog untuk memilih gambar
+            OpenFileDialog openFileDialog = new OpenFileDialog
+            {
+                Filter = "Image Files|*.jpg;*.jpeg;*.png;*.bmp;*.gif",
+                Title = "Pilih Gambar"
+            };
+
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                try
+                {
+                    // Folder tujuan (misalnya dalam folder "Uploads" di dalam proyek)
+                    string targetFolder = Path.Combine(Application.StartupPath, "Uploads");
+
+                    // Pastikan folder ada, jika tidak, buat folder baru
+                    if (!Directory.Exists(targetFolder))
+                    {
+                        Directory.CreateDirectory(targetFolder);
+                    }
+
+                    // Nama file yang akan disimpan
+                    string fileName = Path.GetFileName(openFileDialog.FileName);
+                    string filePath = Path.Combine(targetFolder, fileName);
+
+                    // Salin file ke folder tujuan
+                    File.Copy(openFileDialog.FileName, filePath, true);
+
+                    // Tampilkan gambar di PictureBox
+                    pictureBox1.Image = new System.Drawing.Bitmap(filePath);
+
+                    MessageBox.Show("Gambar berhasil diunggah ke: " + filePath, "Sukses", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Terjadi kesalahan: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+        }
+    }
+}
